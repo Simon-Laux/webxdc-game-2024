@@ -9,7 +9,7 @@ const stylesheet: cytoscape.Stylesheet[] = [
     selector: "edge",
     style: {
       "curve-style": "bezier",
-      "target-arrow-color": "green",
+      "target-arrow-color": "#555",
       "target-arrow-shape": "triangle",
       label: "data(label)",
       "text-rotation": "autorotate",
@@ -17,6 +17,7 @@ const stylesheet: cytoscape.Stylesheet[] = [
       "text-background-opacity": 0.8,
       "text-background-shape": "roundrectangle",
       "text-background-padding": "3px",
+      "line-color": "data(color)",
     },
   },
   {
@@ -26,31 +27,35 @@ const stylesheet: cytoscape.Stylesheet[] = [
       shape: "round-pentagon",
       "text-valign": "center",
       "text-halign": "center",
+      "background-color": "data(color)",
     },
   },
 ];
 
+const COLOR_OTHERS = "lightgrey";
+const COLOR_MYSELF = "grey";
+
 const mockData = [
-  { data: { id: "one", label: "Node 1" } },
-  { data: { id: "two", label: "Node 2" } },
-  { data: { id: "three", label: "Node 3" } },
+  { data: { id: "one", label: "Node 1", color: COLOR_MYSELF } },
+  { data: { id: "two", label: "Node 2", color: COLOR_OTHERS } },
+  { data: { id: "three", label: "Node 3", color: COLOR_OTHERS } },
   {
-    data: { source: "one", target: "two", label: "32" },
+    data: { source: "one", target: "two", label: "32", color: COLOR_MYSELF },
   },
   {
-    data: { source: "two", target: "one", label: "43" },
+    data: { source: "two", target: "one", label: "43", color: COLOR_OTHERS },
   },
   {
-    data: { source: "one", target: "three", label: "34" },
+    data: { source: "one", target: "three", label: "34", color: COLOR_MYSELF },
   },
   {
-    data: { source: "two", target: "three", label: "6" },
+    data: { source: "two", target: "three", label: "6", color: COLOR_OTHERS },
   },
   {
-    data: { source: "three", target: "two", label: "34" },
+    data: { source: "three", target: "two", label: "34", color: COLOR_OTHERS },
   },
   {
-    data: { source: "three", target: "one", label: "16" },
+    data: { source: "three", target: "one", label: "16", color: COLOR_OTHERS },
   },
 ];
 
@@ -70,7 +75,7 @@ export default function PingGraph() {
     if (Object.prototype.hasOwnProperty.call(knownPeers, key)) {
       const peer = knownPeers[key];
       data.push({
-        data: { id: peer.peerId, label: peer.peerId },
+        data: { id: peer.peerId, label: peer.peerId, color: COLOR_OTHERS },
       });
       peer.pingsToOtherUsers?.forEach((pingState) => {
         data.push({
@@ -78,6 +83,7 @@ export default function PingGraph() {
             source: peer.peerId,
             target: pingState.peerId,
             label: pingState.ping,
+            color: COLOR_OTHERS,
           },
         });
       });
@@ -85,7 +91,7 @@ export default function PingGraph() {
   }
 
   data.push({
-    data: { id: myPeerId, label: myPeerId },
+    data: { id: myPeerId, label: myPeerId, color: COLOR_MYSELF },
   });
 
   myPingsToOtherUsers.forEach((pingState) => {
@@ -94,6 +100,7 @@ export default function PingGraph() {
         source: myPeerId,
         target: pingState.peerId,
         label: pingState.ping,
+        color: COLOR_MYSELF,
       },
     });
   });

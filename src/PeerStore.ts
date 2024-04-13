@@ -102,5 +102,7 @@ export const usePeersStore = create<PeersStore>((set, get) => ({
   },
 }));
 
-setInterval(usePeersStore.getState().sendPing, 800);
-setInterval(usePeersStore.getState().sendPingReport, 4000);
+if (window.webxdc) {
+  setInterval(usePeersStore.getState().sendPing, 800);
+  setInterval(usePeersStore.getState().sendPingReport, 4000);
+}

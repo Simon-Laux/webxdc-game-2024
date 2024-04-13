@@ -4,13 +4,14 @@ import { myPeerId } from "../peerId";
 import { usePeersStore } from "../PeerStore";
 import { PeerPingReport } from "../types";
 
+//@ts-ignore
+import getRGB from "consistent-color-generation";
+
 const stylesheet: cytoscape.Stylesheet[] = [
   {
     selector: "edge",
     style: {
       "curve-style": "bezier",
-      "target-arrow-color": "#555",
-      "target-arrow-shape": "triangle",
       label: "data(label)",
       "text-rotation": "autorotate",
       "text-background-color": "lightgrey",
@@ -18,6 +19,8 @@ const stylesheet: cytoscape.Stylesheet[] = [
       "text-background-shape": "roundrectangle",
       "text-background-padding": "3px",
       "line-color": "data(color)",
+      //@ts-ignore
+      "line-style": "data(lineStyle)"
     },
   },
   {
@@ -32,30 +35,70 @@ const stylesheet: cytoscape.Stylesheet[] = [
   },
 ];
 
-const COLOR_OTHERS = "lightgrey";
-const COLOR_MYSELF = "grey";
+function name2Color(name: string, myself: boolean) {
+  return getRGB(
+    name,
+    undefined,
+    myself ? 90 : 60,
+    myself ? undefined : 80
+  ).toString("hex");
+}
 
 const mockData = [
-  { data: { id: "one", label: "Node 1", color: COLOR_MYSELF } },
-  { data: { id: "two", label: "Node 2", color: COLOR_OTHERS } },
-  { data: { id: "three", label: "Node 3", color: COLOR_OTHERS } },
+  { data: { id: "one", label: "Node 1", color: name2Color("one", true) } },
+  { data: { id: "two", label: "Node 2", color: name2Color("two", false) } },
+  { data: { id: "three", label: "Node 3", color: name2Color("three", false) } },
   {
-    data: { source: "one", target: "two", label: "32", color: COLOR_MYSELF },
+    data: {
+      source: "one",
+      target: "two",
+      label: "32",
+      color: name2Color("one", true),
+    },
   },
   {
-    data: { source: "two", target: "one", label: "43", color: COLOR_OTHERS },
+    data: {
+      source: "two",
+      target: "one",
+      label: "43",
+      color: name2Color("two", false),
+      lineStyle: 'dashed'
+    },
   },
   {
-    data: { source: "one", target: "three", label: "34", color: COLOR_MYSELF },
+    data: {
+      source: "one",
+      target: "three",
+      label: "34",
+      color: name2Color("one", true),
+    },
   },
   {
-    data: { source: "two", target: "three", label: "6", color: COLOR_OTHERS },
+    data: {
+      source: "two",
+      target: "three",
+      label: "6",
+      color: name2Color("two", false),
+      lineStyle: 'dashed'
+    },
   },
   {
-    data: { source: "three", target: "two", label: "34", color: COLOR_OTHERS },
+    data: {
+      source: "three",
+      target: "two",
+      label: "34",
+      color: name2Color("three", false),
+      lineStyle: 'dashed'
+    },
   },
   {
-    data: { source: "three", target: "one", label: "16", color: COLOR_OTHERS },
+    data: {
+      source: "three",
+      target: "one",
+      label: "16",
+      color: name2Color("three", false),
+      lineStyle: 'dashed'
+    },
   },
 ];
 
@@ -75,7 +118,11 @@ export default function PingGraph() {
     if (Object.prototype.hasOwnProperty.call(knownPeers, key)) {
       const peer = knownPeers[key];
       data.push({
-        data: { id: peer.peerId, label: peer.peerId, color: COLOR_OTHERS },
+        data: {
+          id: peer.peerId,
+          label: peer.peerId,
+          color: name2Color(peer.peerId, false),
+        },
       });
       peer.pingsToOtherUsers?.forEach((pingState) => {
         data.push({
@@ -83,7 +130,8 @@ export default function PingGraph() {
             source: peer.peerId,
             target: pingState.peerId,
             label: pingState.ping,
-            color: COLOR_OTHERS,
+            color: name2Color(peer.peerId, false),
+            lineStyle: 'dashed'
           },
         });
       });
@@ -91,7 +139,7 @@ export default function PingGraph() {
   }
 
   data.push({
-    data: { id: myPeerId, label: myPeerId, color: COLOR_MYSELF },
+    data: { id: myPeerId, label: myPeerId, color: name2Color(myPeerId, false) },
   });
 
   myPingsToOtherUsers.forEach((pingState) => {
@@ -100,7 +148,7 @@ export default function PingGraph() {
         source: myPeerId,
         target: pingState.peerId,
         label: pingState.ping,
-        color: COLOR_MYSELF,
+        color: name2Color(myPeerId, false),
       },
     });
   });

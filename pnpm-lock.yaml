@@ -11,9 +11,15 @@ dependencies:
   '@types/react-cytoscapejs':
     specifier: ^1.2.5
     version: 1.2.5
+  consistent-color-generation:
+    specifier: github:jsxc/consistent-color-generation
+    version: github.com/jsxc/consistent-color-generation/336449275316de201c03c2012f648c5313e61847
   cytoscape:
     specifier: ^3.28.1
     version: 3.28.1
+  hsluv:
+    specifier: ^1.0.1
+    version: 1.0.1
   jotai:
     specifier: ^2.8.0
     version: 2.8.0(@types/react@18.2.78)(react@18.2.0)
@@ -2148,6 +2154,14 @@ packages:
     resolution: {integrity: sha512-2bsegYkkHO+h/9MGbn6KWcE45cHZgPANo5LXF7EvWdT0yT2EguSVO1nDgU5c8+ZOPwp2vMNa7YFsJhVcDR9Sdg==}
     dev: false
 
+  /hsluv@0.1.0:
+    resolution: {integrity: sha512-ERcanKLAszD2XN3Vh5r5Szkrv9q0oSTudmP0rkiKAGM/3NMc9FLmMZBB7TSqTaXJfSDBOreYTfjezCOYbRKqlw==}
+    dev: false
+
+  /hsluv@1.0.1:
+    resolution: {integrity: sha512-zCaFTiDqBLQjCCFBu0qg7z9ASYPd+Bxx2GDCVZJsnehjK80S+jByqhuFz0pCd2Aw3FSKr18AWbRlwnKR0YdizQ==}
+    dev: false
+
   /http-errors@2.0.0:
     resolution: {integrity: sha512-FtwrG/euBzaEjYeRqOgly7G0qviiXoJWnvEH2Z1plBdXgbyjv34pHTSb9zoeHMyDy33+DWy5Wt9Wo+TURtOYSQ==}
     engines: {node: '>= 0.8'}
@@ -2282,6 +2296,10 @@ packages:
     dependencies:
       '@types/react': 18.2.78
       react: 18.2.0
+    dev: false
+
+  /js-sha1@0.6.0:
+    resolution: {integrity: sha512-01gwBFreYydzmU9BmZxpVk6svJJHrVxEN3IOiGl6VO93bVKYETJ0sIth6DASI6mIFdt7NmfX9UiByRzsYHGU9w==}
     dev: false
 
   /js-tokens@4.0.0:
@@ -3150,6 +3168,15 @@ packages:
       '@types/react': 18.2.78
       react: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
+    dev: false
+
+  github.com/jsxc/consistent-color-generation/336449275316de201c03c2012f648c5313e61847:
+    resolution: {tarball: https://codeload.github.com/jsxc/consistent-color-generation/tar.gz/336449275316de201c03c2012f648c5313e61847}
+    name: consistent-color-generation
+    version: 0.4.0
+    dependencies:
+      hsluv: 0.1.0
+      js-sha1: 0.6.0
     dev: false
 
   github.com/webxdc/webxdc-types/f331601907887a52b40eddb362d03bc44548b0b4:

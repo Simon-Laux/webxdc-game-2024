@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useLayoutEffect, useMemo, useRef } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import { myPeerId } from "../peerId";
 import { usePeersStore } from "../PeerStore";
@@ -39,8 +39,8 @@ function name2Color(name: string, myself: boolean) {
   return getRGB(
     name,
     undefined,
-    myself ? 90 : 60,
-    myself ? undefined : 80
+    myself ? 90 : 80,
+    myself ? 40 : 60
   ).toString("hex");
 }
 
@@ -103,7 +103,12 @@ const mockData = [
 ];
 
 export default function PingGraph() {
+  const cyRef = useRef<cytoscape.Core|null>(null)
   const knownPeers = usePeersStore(({ knownPeers }) => knownPeers);
+
+  useLayoutEffect(()=>{
+    cyRef.current?.layout({ name: "circle"}).run()
+  }, [Object.keys(knownPeers).length])
 
   const myPingsToOtherUsers: PeerPingReport = Object.keys(knownPeers).map(
     (peerId) => {
@@ -157,6 +162,8 @@ export default function PingGraph() {
     ? data
     : mockData;
 
+
+
   return (
     <div
       style={{
@@ -169,8 +176,8 @@ export default function PingGraph() {
       <CytoscapeComponent
         elements={elements}
         style={{ width: "100%", height: "100%" }}
-        layout={{ name: "circle" }}
         stylesheet={stylesheet}
+        cy={cy=>cyRef.current=cy}
       />
     </div>
   );

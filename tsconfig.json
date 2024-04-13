@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "jsx": "react",
+        "lib": ["DOM", "ES6"],
+        "esModuleInterop": true
+    }
+}

@@ -10,7 +10,7 @@ systems (ideas):
 
 Other tasks & ideas:
 - [ ] DebugUI: human readable last seen (relative time? but we would need to update that very often, so maybe better only time + milis?)
-- [ ] DebugUI: ping graph: when peers join recalculate layout/positions 
+- [X] DebugUI: ping graph: when peers join recalculate layout/positions 
 - [X] DebugUI: the edge arrows are confusing, use colors instead
 - [ ] Ping system: think about disconnection detection
     - maybe let the peers report also the last seen time in `ping.report`

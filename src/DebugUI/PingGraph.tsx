@@ -1,7 +1,7 @@
 import React, { useLayoutEffect, useMemo, useRef } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
-import { myPeerId } from "../peerId";
-import { usePeersStore } from "../PeerStore";
+import { myPeerId } from "../systems/peerId";
+import { usePeersStore } from "../systems/PeerStore";
 import { PeerPingReport } from "../types";
 
 //@ts-ignore

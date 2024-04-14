@@ -1,4 +1,4 @@
-import { EpermeralPacket } from "./types";
+import { EpermeralPacket } from "../types";
 
 export const myPeerId = (() => {
   const LOCAL_STORAGE_KEY = "my.game.deviceId";

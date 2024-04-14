@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
-import { usePeersStore } from "./PeerStore";
+import { usePeersStore } from "./systems/PeerStore";
 
-import "./peerId";
+import "./systems/peerId";
 import { PingTable } from "./DebugUI/PingTable";
 import PingGraph from "./DebugUI/PingGraph";
 

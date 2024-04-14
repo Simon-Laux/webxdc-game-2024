@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { myPeerId, randomId, sendPacket } from "./peerId";
-import { EpermeralPayload, PeerPingReport } from "./types";
+import { EpermeralPayload, PeerPingReport } from "../types";
 
 interface Peer {
   peerId: string;

@@ -1,6 +1,6 @@
 import React from "react";
-import { myPeerId } from "../peerId";
-import { usePeersStore } from "../PeerStore";
+import { myPeerId } from "../systems/peerId";
+import { usePeersStore } from "../systems/PeerStore";
 
 export function PingTable() {
   const knownPeers = usePeersStore((state) => state.knownPeers);

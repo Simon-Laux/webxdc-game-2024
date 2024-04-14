@@ -7,9 +7,7 @@ import {
   usePeersStore,
 } from "../systems/PeerStore";
 import { PeerPingReport } from "../types";
-
-//@ts-ignore
-import getRGB from "consistent-color-generation";
+import { name2Color } from "../util";
 
 const stylesheet: cytoscape.Stylesheet[] = [
   {
@@ -39,12 +37,6 @@ const stylesheet: cytoscape.Stylesheet[] = [
     },
   },
 ];
-
-function name2Color(name: string, myself: boolean) {
-  return getRGB(name, undefined, myself ? 90 : 80, myself ? 40 : 60).toString(
-    "hex"
-  );
-}
 
 const enum LINE_WIDTH {
   SMALL = 1,

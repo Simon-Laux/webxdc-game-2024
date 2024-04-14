@@ -1,4 +1,6 @@
 import React from "react";
+import { Name } from "./components/Name";
+
 import { MatchRequest, useMatchmaking } from "./systems/Matchmaking";
 import { myPeerId } from "./systems/peerId";
 import { Peer, UI_OFFLINE_TIMEOUT, usePeersStore } from "./systems/PeerStore";
@@ -53,7 +55,7 @@ export function MatchRequestElement({ request }: { request: MatchRequest }) {
   };
   return (
     <button onClick={onJoinRequest} disabled={my_match || offline}>
-      {my_match ? "My Match Invitation" : request.host}
+      {my_match ? "My Match Invitation" : <Name peerId={request.host} />}
       <br />
       <small>{request.matchId}</small>
       {currentJoinRequest === request.matchId && (
@@ -79,7 +81,7 @@ export function RunningMatches() {
     <div>
       {runningMatches.map((match) => (
         <button disabled>
-          {match.host} vs {match.guest}
+          <Name peerId={match.host} /> vs <Name peerId={match.guest} />
           <br />
           <small>{match.matchId}</small>
         </button>
@@ -91,3 +93,5 @@ export function RunningMatches() {
 export function PastMatches() {
   return <div></div>;
 }
+
+

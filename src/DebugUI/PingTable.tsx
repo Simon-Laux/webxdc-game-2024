@@ -1,6 +1,8 @@
 import React from "react";
+import { Name } from "../components/Name";
 import { myPeerId } from "../systems/peerId";
 import { usePeersStore } from "../systems/PeerStore";
+import { name2Color } from "../util";
 
 export function PingTable() {
   const knownPeers = usePeersStore((state) => state.knownPeers);
@@ -16,7 +18,9 @@ export function PingTable() {
       </thead>
       <tbody>
         <tr>
-          <td>myself ({myPeerId})</td>
+          <td style={{ color: name2Color(myPeerId, true) }}>
+            myself ({myPeerId})
+          </td>
           <td>-</td>
           <td>-</td>
         </tr>
@@ -24,7 +28,9 @@ export function PingTable() {
           const peer = knownPeers[peerId];
           return (
             <tr>
-              <td>{peer.peerId}</td>
+              <td style={{ color: name2Color(peer.peerId, false) }}>
+                <Name peerId={peer.peerId} /> ({peer.peerId})
+              </td>
               <td>{peer.last_seen}</td>
               <td>{peer.lastPing?.ping}</td>
             </tr>

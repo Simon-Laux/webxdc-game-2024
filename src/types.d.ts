@@ -49,7 +49,24 @@ export interface PingReportPacket {
   report: PeerPingReport;
 }
 
-export type PingPackets = PingPacket | PongPacket | PingReportPacket;
+export type PingPackets = AllPackets & PingSystemPacket;
+
+//#endregion
+
+//#region displayname
+export interface DisplaynameSystemPacket extends Packet {
+  type: `displayname.${string}`;
+}
+export interface DisplaynameRequestPacket {
+  type: "displayname.request";
+  myName: string;
+}
+export interface DisplaynameResponsePacket {
+  type: "displayname.response";
+  myName: string;
+}
+
+export type DisplaynamePackets = AllPackets & DisplaynameSystemPacket;
 
 //#endregion
 
@@ -107,6 +124,9 @@ type EpermeralPacket =
   | PingPacket
   | PongPacket
   | PingReportPacket
+  // Displayname
+  | DisplaynameRequestPacket
+  | DisplaynameResponsePacket
   // Matchmaking
   | MatchmakingRequest
   | MatchmakingAccept

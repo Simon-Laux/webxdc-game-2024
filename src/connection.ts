@@ -24,11 +24,11 @@ export const EphermeralReadyPromise =
         .processPackage(packet as Payload<MatchmakingPackets>);
     }
 
-    console.debug("[IN]", packet.peerId, packet.payload);
+    console.debug("[IN]", packet.peerId, packet.payload.type, packet.payload);
   }) || Promise.reject("webxdc p2p does not exist");
 
 export function sendPacket(packet: EpermeralPacket) {
-  console.debug("[OUT]", packet);
+  console.debug("[OUT]", packet.type, packet);
   window.webxdc.sendEphemeralUpdate({ peerId: myPeerId, payload: packet });
 }
 
@@ -44,11 +44,11 @@ export const StatusUpdateReadyPromise =
         .processPackage(packet as Payload<MatchmakingPackets>);
     }
 
-    console.debug("{IN}", packet.peerId, packet.payload);
+    console.debug("{IN}", packet.peerId, packet.payload.type, packet.payload);
   }) || Promise.reject("webxdc does not exist");
 
 export function sendUpdate(packet: StatusPacket) {
-  console.debug("{OUT}", packet);
+  console.debug("{OUT}", packet.type, packet);
   window.webxdc.sendUpdate(
     { payload: { peerId: myPeerId, payload: packet } },
     packet.type

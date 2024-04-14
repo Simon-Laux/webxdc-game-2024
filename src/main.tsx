@@ -5,6 +5,7 @@ import "./systems/peerId";
 import { EphermeralReadyPromise, StatusUpdateReadyPromise } from "./connection";
 import DebugUI from "./DebugUI";
 import { HeaderStats } from "./DebugUI/HeaderStats";
+import { MatchSelector } from "./MatchmakingUI";
 
 export function App() {
   const [readyEphermeral, setReadyEphermeral] = useState(false);
@@ -36,6 +37,8 @@ export function App() {
         <br />
         {readyEphermeral || "Waiting for someone else to open the webxdc"}
       </div>
+
+      {readyStatusUpdate && readyEphermeral && <MatchSelector />}
 
       {showDebugUI && <DebugUI onClose={() => setShowDebugUI(false)} />}
     </div>

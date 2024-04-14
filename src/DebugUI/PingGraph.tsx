@@ -126,7 +126,11 @@ export default function PingGraph() {
   const myPingsToOtherUsers: PeerPingReport = Object.keys(knownPeers).map(
     (peerId) => {
       const peer = knownPeers[peerId];
-      return { peerId: peerId, ping: peer.lastPing?.ping };
+      return {
+        peerId: peerId,
+        ping: peer.lastPing?.ping,
+        receivedTime: peer.lastPing?.receivedTime || 0,
+      };
     }
   );
 
@@ -187,6 +191,7 @@ export default function PingGraph() {
         label: pingState.ping,
         color: name2Color(myPeerId, false),
         lineWidth,
+        lineStyle: "solid",
       },
     });
   });

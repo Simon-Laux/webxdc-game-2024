@@ -1,5 +1,5 @@
 import { Webxdc } from "webxdc-types";
-import { MatchId } from "./systems/Matchmaking";
+import { MatchId, MatchResult } from "./systems/Matchmaking";
 import { PeerId } from "./systems/peerId";
 
 // types
@@ -7,7 +7,7 @@ import { PeerId } from "./systems/peerId";
 export interface PeerPingState {
   peerId: string;
   ping?: number;
-  receivedTime: number,
+  receivedTime: number;
 }
 
 export type PeerPingReport = PeerPingState[];
@@ -84,7 +84,19 @@ export interface MatchmakingConfirm {
   matchId: MatchId;
 }
 
-export type MatchmakingPackets = AllPackets & MatchmakingSystemPacket
+/**
+ * announce that a game ended and who is the winner
+ * @sent over both persistent and p2p channel
+ */
+export interface MatchmakingMatchResult {
+  type: "match.result";
+  matchId: MatchId;
+  host: PeerId;
+  guest: PeerId;
+  result: MatchResult;
+}
+
+export type MatchmakingPackets = AllPackets & MatchmakingSystemPacket;
 
 //#endregion
 
@@ -96,12 +108,13 @@ type EpermeralPacket =
   // Matchmaking
   | MatchmakingRequest
   | MatchmakingAccept
-  | MatchmakingConfirm;
+  | MatchmakingConfirm
+  | MatchmakingMatchResult;
 type StatusPacket =
   // Matchmaking
-  MatchmakingRequest | MatchmakingConfirm;
+  MatchmakingRequest | MatchmakingConfirm | MatchmakingMatchResult;
 
-type AllPackets = EpermeralPacket | StatusPacket
+type AllPackets = EpermeralPacket | StatusPacket;
 
 //#endregion
 

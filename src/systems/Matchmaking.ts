@@ -1,6 +1,11 @@
 import { create } from "zustand";
 import { sendPacket, sendUpdate } from "../connection";
-import { MatchmakingPackets, MatchmakingRequest, Payload } from "../types";
+import {
+  MatchmakingConfirm,
+  MatchmakingPackets,
+  MatchmakingRequest,
+  Payload,
+} from "../types";
 import { randomId } from "../util";
 import { myPeerId, PeerId } from "./peerId";
 
@@ -72,8 +77,76 @@ export const useMatchmaking = create<Matchmaking>((set, get) => ({
         ],
       }));
     } else if (packet.payload.type === "match.accept") {
+      // check match request exist and I am the host
+      const matchRequest = get().matchRequests.find(
+        (mr) => mr.matchId === packet.payload.matchId && mr.host === myPeerId
+      );
+      if (!matchRequest) {
+        console.debug(
+          "match accept/join request is not for me or request does not exist"
+        );
+        return;
+      }
+      // check running match does not exists yet
+
+      if (
+        get().runningMatches.findIndex(
+          (m) => m.matchId === packet.payload.matchId
+        ) !== -1
+      ) {
+        console.debug("match already exists");
+        // remove request
+        set(({ matchRequests }) => ({
+          matchRequests: matchRequests.filter(
+            (mr) => mr.matchId !== packet.payload.matchId
+          ),
+        }));
+        return;
+      }
+
+      const match: RunningMatch = {
+        matchId: packet.payload.matchId,
+        host: matchRequest.host,
+        guest: packet.peerId,
+      };
+      // create match
+      set(({ runningMatches }) => ({
+        runningMatches: [...runningMatches, match],
+      }));
+
+      // send confirmation
+      const newPacket: MatchmakingConfirm = {
+        type: "match.confirm",
+        ...match,
+      };
+
+      sendPacket(newPacket);
+      sendUpdate(newPacket);
     } else if (packet.payload.type === "match.confirm") {
+      if (get().runningMatches.findIndex((m) => m.matchId) !== -1) {
+        console.debug("match already exists");
+        // remove request
+        set(({ matchRequests }) => ({
+          matchRequests: matchRequests.filter(
+            (mr) => mr.matchId !== packet.payload.matchId
+          ),
+        }));
+        return;
+      }
+      const match = {
+        matchId: packet.payload.matchId,
+        host: packet.payload.host,
+        guest: packet.payload.guest,
+      };
+      // remove match request and create running match
+      set(({ matchRequests, runningMatches }) => ({
+        matchRequests: matchRequests.filter(
+          (mr) => mr.matchId !== packet.payload.matchId
+        ),
+        runningMatches: [...runningMatches, match],
+      }));
     } else if (packet.payload.type === "match.result") {
+      // remove running match and create past match
     }
   },
   sendMatchRequest: () => {

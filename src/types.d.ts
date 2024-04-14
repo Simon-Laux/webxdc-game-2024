@@ -82,6 +82,8 @@ export interface MatchmakingAccept {
 export interface MatchmakingConfirm {
   type: "match.confirm";
   matchId: MatchId;
+  host: PeerId;
+  guest: PeerId;
 }
 
 /**

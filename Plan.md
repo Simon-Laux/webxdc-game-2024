@@ -17,6 +17,7 @@ Other tasks & ideas:
     - maybe add a timeout to ping requests
 - [ ] DebugUI & ping system: remember ping history (last n pings)
 
+- [ ] Ability to spectate -> host sends checkpoint (complete gamestate) every 3 seconds to sync with guest and to make it possible to spectate, spectator just needs to wait up to 3 seconds to get the chekpoint and then they can spectate the game
 
 Out of scope:
 - [ ] record and replay matches (send via use update)

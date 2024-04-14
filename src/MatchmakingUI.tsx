@@ -33,7 +33,10 @@ export function MatchRequests() {
 
 export function MatchRequestElement({ request }: { request: MatchRequest }) {
   // get last ping so we rerender on each ping
-  const { knownPeers } = usePeersStore(({ knownPeers, lastSentPing }) => ({ knownPeers, lastSentPing }));
+  const { knownPeers } = usePeersStore(({ knownPeers, lastSentPing }) => ({
+    knownPeers,
+    lastSentPing,
+  }));
   const currentJoinRequest = useMatchmaking(
     ({ currentJoinRequest }) => currentJoinRequest
   );
@@ -70,7 +73,19 @@ export function MatchRequestElement({ request }: { request: MatchRequest }) {
 }
 
 export function RunningMatches() {
-  return <div></div>;
+  const runningMatches = useMatchmaking(({ runningMatches }) => runningMatches);
+  // disabled button because you might be able to spectate at a later point in time
+  return (
+    <div>
+      {runningMatches.map((match) => (
+        <button disabled>
+          {match.host} vs {match.guest}
+          <br />
+          <small>{match.matchId}</small>
+        </button>
+      ))}
+    </div>
+  );
 }
 
 export function PastMatches() {

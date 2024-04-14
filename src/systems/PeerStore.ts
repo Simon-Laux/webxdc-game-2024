@@ -1,6 +1,12 @@
 import { create } from "zustand";
-import { myPeerId, randomId, sendPacket } from "./peerId";
-import { EpermeralPayload, PeerPingReport } from "../types";
+import { myPeerId } from "./peerId";
+import {
+  Payload,
+  PeerPingReport,
+  PingPackets,
+} from "../types";
+import { randomId } from "../util";
+import { sendPacket } from "../connection";
 
 interface Peer {
   peerId: string;
@@ -22,7 +28,7 @@ const buildPeer = (peerId: string, last_seen: number) => {
 interface PeersStore {
   knownPeers: { [peerId: string]: Peer };
   lastSentPing: { ts: number; id: string } | null;
-  processEphemeralPackage: (packet: EpermeralPayload) => void;
+  processPackage: (packet: Payload<PingPackets>) => void;
   sendPing: () => void;
   sendPingReport: () => void;
 }
@@ -30,7 +36,7 @@ interface PeersStore {
 export const usePeersStore = create<PeersStore>((set, get) => ({
   knownPeers: {},
   lastSentPing: null,
-  processEphemeralPackage: (packet) => {
+  processPackage: (packet) => {
     if (packet.peerId === myPeerId) {
       console.debug("ignoring update for own peer id");
       return;

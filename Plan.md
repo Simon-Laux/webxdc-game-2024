@@ -16,3 +16,7 @@ Other tasks & ideas:
     - maybe let the peers report also the last seen time in `ping.report`
     - maybe add a timeut to ping requests
 - [ ] DebugUI & ping system: remember ping history (last n pings)
+
+
+Out of scope:
+- [ ] record and replay matches (send via use update)

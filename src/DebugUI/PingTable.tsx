@@ -6,7 +6,7 @@ export function PingTable() {
   const knownPeers = usePeersStore((state) => state.knownPeers);
 
   return (
-    <table className="pingtable">
+    <table className="pingtable" style={{ margin: 4 }}>
       <thead>
         <tr>
           <td>Peer Id</td>

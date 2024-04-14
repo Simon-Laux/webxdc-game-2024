@@ -167,10 +167,10 @@ export default function PingGraph() {
   return (
     <div
       style={{
-        width: "100%",
-        height: "500px",
+        flexGrow: 1,
         border: "1px grey solid",
         borderRadius: 15,
+        margin: 4
       }}
     >
       <CytoscapeComponent

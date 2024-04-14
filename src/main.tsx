@@ -1,34 +1,37 @@
 import React, { useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
-import { usePeersStore } from "./systems/PeerStore";
 
 import "./systems/peerId";
 import { PingTable } from "./DebugUI/PingTable";
 import PingGraph from "./DebugUI/PingGraph";
-
-const readyPromise =
-  window.webxdc?.setEphemeralUpdateListener((packet) => {
-    // sort packets to to right handler
-
-    if (packet.payload.type.startsWith("ping.")) {
-      usePeersStore.getState().processEphemeralPackage(packet);
-    }
-
-    console.debug("[IN]", packet.peerId, packet.payload);
-  }) || Promise.reject("webxdc does not exist");
+import { EphermeralReadyPromise, StatusUpdateReadyPromise } from "./connection";
+import DebugUI from "./DebugUI";
 
 export function App() {
-  const [ready, setReady] = useState(false);
+  const [readyEphermeral, setReadyEphermeral] = useState(false);
+  const [readyStatusUpdate, setReadyStatusUpdate] = useState(false);
+  const [showDebugUI, setShowDebugUI] = useState(false);
 
   useEffect(() => {
-    readyPromise.then(() => setReady(true));
+    EphermeralReadyPromise.then(() => setReadyEphermeral(true));
+    StatusUpdateReadyPromise.then(() => setReadyStatusUpdate(true));
   }, []);
 
   return (
     <div>
-      {ready || "Waiting for someone else to open the webxdc"}
-      <PingTable />
-      <PingGraph />
+      <button
+        onClick={() => setShowDebugUI(true)}
+        style={{ fontSize: "1.4em", margin: 5 }}
+      >
+        Open Debug Menu
+      </button>
+
+      <div>
+        {readyStatusUpdate || "Processing old updates"}<br />
+        {readyEphermeral || "Waiting for someone else to open the webxdc"}
+      </div>
+
+      {showDebugUI && <DebugUI onClose={() => setShowDebugUI(false)} />}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { EpermeralPacket } from "../types";
+export type PeerId = string
 
 export const myPeerId = (() => {
   const LOCAL_STORAGE_KEY = "my.game.deviceId";
@@ -9,20 +9,7 @@ export const myPeerId = (() => {
       (deviceId = (Math.random() * 100).toString(26))
     );
   }
-  return `${window.webxdc?.selfAddr || "?"}-${deviceId}`;
+  return `${window.webxdc?.selfAddr || "?"}-${deviceId}` as PeerId;
 })();
 
 console.info("PeerId of this device is:", myPeerId);
-
-export function sendPacket(packet: EpermeralPacket) {
-  console.debug("[OUT]", packet);
-  window.webxdc.sendEphemeralUpdate({ peerId: myPeerId, payload: packet });
-}
-
-const randomIdSeed = Math.floor(Math.random() * 1000);
-
-export function randomId() {
-  return (
-    Math.floor(Math.random() * 100000 + randomIdSeed) * randomIdSeed
-  ).toString(26);
-}

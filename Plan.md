@@ -6,6 +6,7 @@ systems (ideas):
 - [X] Ping
 - [ ] 2 Player Matchmaking, with the ability to spectate running games
 - [ ] Make a 2 player game with rollback + input delay that is based on ping * 1.5
+- [ ] Toast system that shows errors to the user
 
 
 Other tasks & ideas:

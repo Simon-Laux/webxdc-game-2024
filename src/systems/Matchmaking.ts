@@ -189,6 +189,11 @@ export const useMatchmaking = create<Matchmaking>((set, get) => ({
         "you can not join a match if you have an open match request"
       );
     }
+    if (get().runningMatches.findIndex((m) => m.host === myPeerId || m.guest === myPeerId) !== -1) {
+        throw new Error(
+          "you can not join a match if are already in a match"
+        );
+      }
     // send join request
     sendPacket({ type: "match.accept", matchId: request.matchId });
     set({ currentJoinRequest: request.matchId });

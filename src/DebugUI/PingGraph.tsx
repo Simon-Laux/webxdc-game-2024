@@ -170,7 +170,8 @@ export default function PingGraph() {
         flexGrow: 1,
         border: "1px grey solid",
         borderRadius: 15,
-        margin: 4
+        margin: 4,
+        maxHeight: "70vh"
       }}
     >
       <CytoscapeComponent

@@ -111,6 +111,11 @@ export const useMatchmaking = create<Matchmaking>((set, get) => ({
     ) {
       throw new Error("match join request does not exist");
     }
+    if (get().matchRequests.findIndex((mr) => mr.host === myPeerId) !== -1) {
+      throw new Error(
+        "you can not join a match if you have an open match request"
+      );
+    }
     // send join request
     sendPacket({ type: "match.accept", matchId: request.matchId });
     set({ currentJoinRequest: request.matchId });

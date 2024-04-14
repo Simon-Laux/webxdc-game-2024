@@ -4,7 +4,7 @@ import { Payload, PeerPingReport, PingPackets } from "../types";
 import { randomId } from "../util";
 import { sendPacket } from "../connection";
 
-interface Peer {
+export interface Peer {
   peerId: string;
   /** last ping to the user */
   lastPing?: {

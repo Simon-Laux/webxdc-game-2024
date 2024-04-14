@@ -20,7 +20,7 @@ const stylesheet: cytoscape.Stylesheet[] = [
       "text-background-padding": "3px",
       "line-color": "data(color)",
       //@ts-ignore
-      "line-style": "data(lineStyle)"
+      "line-style": "data(lineStyle)",
     },
   },
   {
@@ -36,12 +36,9 @@ const stylesheet: cytoscape.Stylesheet[] = [
 ];
 
 function name2Color(name: string, myself: boolean) {
-  return getRGB(
-    name,
-    undefined,
-    myself ? 90 : 80,
-    myself ? 40 : 60
-  ).toString("hex");
+  return getRGB(name, undefined, myself ? 90 : 80, myself ? 40 : 60).toString(
+    "hex"
+  );
 }
 
 const mockData = [
@@ -62,7 +59,7 @@ const mockData = [
       target: "one",
       label: "43",
       color: name2Color("two", false),
-      lineStyle: 'dashed'
+      lineStyle: "dashed",
     },
   },
   {
@@ -79,7 +76,7 @@ const mockData = [
       target: "three",
       label: "6",
       color: name2Color("two", false),
-      lineStyle: 'dashed'
+      lineStyle: "dashed",
     },
   },
   {
@@ -88,7 +85,7 @@ const mockData = [
       target: "two",
       label: "34",
       color: name2Color("three", false),
-      lineStyle: 'dashed'
+      lineStyle: "dashed",
     },
   },
   {
@@ -97,18 +94,18 @@ const mockData = [
       target: "one",
       label: "16",
       color: name2Color("three", false),
-      lineStyle: 'dashed'
+      lineStyle: "dashed",
     },
   },
 ];
 
 export default function PingGraph() {
-  const cyRef = useRef<cytoscape.Core|null>(null)
+  const cyRef = useRef<cytoscape.Core | null>(null);
   const knownPeers = usePeersStore(({ knownPeers }) => knownPeers);
 
-  useLayoutEffect(()=>{
-    cyRef.current?.layout({ name: "circle"}).run()
-  }, [Object.keys(knownPeers).length])
+  useLayoutEffect(() => {
+    cyRef.current?.layout({ name: "circle" }).run();
+  }, [Object.keys(knownPeers).length]);
 
   const myPingsToOtherUsers: PeerPingReport = Object.keys(knownPeers).map(
     (peerId) => {
@@ -136,7 +133,7 @@ export default function PingGraph() {
             target: pingState.peerId,
             label: pingState.ping,
             color: name2Color(peer.peerId, false),
-            lineStyle: 'dashed'
+            lineStyle: "dashed",
           },
         });
       });
@@ -162,8 +159,6 @@ export default function PingGraph() {
     ? data
     : mockData;
 
-
-
   return (
     <div
       style={{
@@ -171,14 +166,14 @@ export default function PingGraph() {
         border: "1px grey solid",
         borderRadius: 15,
         margin: 4,
-        maxHeight: "70vh"
+        maxHeight: "70vh",
       }}
     >
       <CytoscapeComponent
         elements={elements}
         style={{ width: "100%", height: "100%" }}
         stylesheet={stylesheet}
-        cy={cy=>cyRef.current=cy}
+        cy={(cy) => (cyRef.current = cy)}
       />
     </div>
   );

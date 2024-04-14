@@ -1,7 +1,11 @@
 import React, { useLayoutEffect, useMemo, useRef } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import { myPeerId } from "../systems/peerId";
-import { usePeersStore } from "../systems/PeerStore";
+import {
+  PING_REPORT_INTERVAL,
+  UI_OFFLINE_TIMEOUT,
+  usePeersStore,
+} from "../systems/PeerStore";
 import { PeerPingReport } from "../types";
 
 //@ts-ignore
@@ -21,6 +25,7 @@ const stylesheet: cytoscape.Stylesheet[] = [
       "line-color": "data(color)",
       //@ts-ignore
       "line-style": "data(lineStyle)",
+      width: "data(lineWidth)",
     },
   },
   {
@@ -41,6 +46,11 @@ function name2Color(name: string, myself: boolean) {
   );
 }
 
+const enum LINE_WIDTH {
+  SMALL = 1,
+  NORMAL = 3,
+}
+
 const mockData = [
   { data: { id: "one", label: "Node 1", color: name2Color("one", true) } },
   { data: { id: "two", label: "Node 2", color: name2Color("two", false) } },
@@ -51,6 +61,7 @@ const mockData = [
       target: "two",
       label: "32",
       color: name2Color("one", true),
+      lineWidth: LINE_WIDTH.SMALL,
     },
   },
   {
@@ -60,6 +71,7 @@ const mockData = [
       label: "43",
       color: name2Color("two", false),
       lineStyle: "dashed",
+      lineWidth: LINE_WIDTH.NORMAL,
     },
   },
   {
@@ -68,6 +80,7 @@ const mockData = [
       target: "three",
       label: "34",
       color: name2Color("one", true),
+      lineWidth: LINE_WIDTH.NORMAL,
     },
   },
   {
@@ -77,6 +90,7 @@ const mockData = [
       label: "6",
       color: name2Color("two", false),
       lineStyle: "dashed",
+      lineWidth: LINE_WIDTH.NORMAL,
     },
   },
   {
@@ -86,6 +100,7 @@ const mockData = [
       label: "34",
       color: name2Color("three", false),
       lineStyle: "dashed",
+      lineWidth: LINE_WIDTH.NORMAL,
     },
   },
   {
@@ -95,6 +110,7 @@ const mockData = [
       label: "16",
       color: name2Color("three", false),
       lineStyle: "dashed",
+      lineWidth: LINE_WIDTH.NORMAL,
     },
   },
 ];
@@ -114,18 +130,26 @@ export default function PingGraph() {
     }
   );
 
+  const offlineCutoff = Date.now() - UI_OFFLINE_TIMEOUT;
+  const offlineGossipCutoff = Date.now() - PING_REPORT_INTERVAL * 3;
   const data: cytoscape.ElementDefinition[] = [];
 
   for (const key in knownPeers) {
     if (Object.prototype.hasOwnProperty.call(knownPeers, key)) {
       const peer = knownPeers[key];
+      const online = peer.last_seen >= offlineCutoff;
       data.push({
         data: {
           id: peer.peerId,
           label: peer.peerId,
-          color: name2Color(peer.peerId, false),
+          color: online
+            ? name2Color(peer.peerId, false)
+            : peer.gossiped
+            ? "lightgrey"
+            : "grey",
         },
       });
+      // display gossiped data
       peer.pingsToOtherUsers?.forEach((pingState) => {
         data.push({
           data: {
@@ -134,6 +158,10 @@ export default function PingGraph() {
             label: pingState.ping,
             color: name2Color(peer.peerId, false),
             lineStyle: "dashed",
+            lineWidth:
+              pingState.receivedTime >= offlineGossipCutoff
+                ? LINE_WIDTH.NORMAL
+                : LINE_WIDTH.SMALL,
           },
         });
       });
@@ -145,12 +173,20 @@ export default function PingGraph() {
   });
 
   myPingsToOtherUsers.forEach((pingState) => {
+    const peer = knownPeers[pingState.peerId];
+    if (peer.gossiped) {
+      // we kave no edges to peers that were gossiped to us
+      return;
+    }
+    const lineWidth =
+      peer.last_seen >= offlineCutoff ? LINE_WIDTH.NORMAL : LINE_WIDTH.SMALL;
     data.push({
       data: {
         source: myPeerId,
         target: pingState.peerId,
         label: pingState.ping,
         color: name2Color(myPeerId, false),
+        lineWidth,
       },
     });
   });

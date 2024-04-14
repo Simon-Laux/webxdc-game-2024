@@ -13,8 +13,8 @@ Other tasks & ideas:
 - [X] DebugUI: ping graph: when peers join recalculate layout/positions 
 - [X] DebugUI: the edge arrows are confusing, use colors instead
 - [ ] Ping system: think about disconnection detection
-    - maybe let the peers report also the last seen time in `ping.report`
-    - maybe add a timeut to ping requests
+    - [X] maybe let the peers report also the last seen time in `ping.report`
+    - maybe add a timeout to ping requests
 - [ ] DebugUI & ping system: remember ping history (last n pings)
 
 

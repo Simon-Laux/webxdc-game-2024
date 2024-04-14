@@ -15,10 +15,17 @@ interface Peer {
   pingsToOtherUsers?: PeerPingReport;
   /** unix ts */
   last_seen: number;
+  /** if we know of this peer only from others */
+  gossiped: boolean;
+  gossiped_last_seen: number;
 }
 
 const buildPeer = (peerId: string) => {
-  return { peerId, last_seen: 0 } as Peer;
+  return { peerId, last_seen: 0, gossiped: false } as Peer;
+};
+
+const buildGossipedPeer = (peerId: string, gossiped_last_seen: number) => {
+  return { peerId, last_seen: 0, gossiped: true, gossiped_last_seen } as Peer;
 };
 
 interface PeersStore {
@@ -59,6 +66,7 @@ export const usePeersStore = create<PeersStore>((set, get) => ({
               ...(knownPeers[packet.peerId] || buildPeer(packet.peerId)),
               lastPing: { receivedTime, ping },
               last_seen: receivedTime,
+              gossiped: false,
             },
           },
         }));
@@ -71,10 +79,11 @@ export const usePeersStore = create<PeersStore>((set, get) => ({
         myPeerId,
         packet.peerId,
       ];
-      const newPeers = report
-        .map((item) => item.peerId)
-        .filter((id) => knownPeerIds.indexOf(id) === -1)
-        .map(buildPeer)
+      const newGossipedPeers = report
+        .filter(({ peerId }) => knownPeerIds.indexOf(peerId) === -1)
+        .map(({ peerId, receivedTime }) =>
+          buildGossipedPeer(peerId, receivedTime)
+        )
         .reduce(
           (container, peer) => {
             container[peer.peerId] = peer;
@@ -85,7 +94,7 @@ export const usePeersStore = create<PeersStore>((set, get) => ({
       set(({ knownPeers }) => ({
         knownPeers: {
           ...knownPeers,
-          ...newPeers,
+          ...newGossipedPeers,
           [packet.peerId]: {
             ...(knownPeers[packet.peerId] || buildPeer(packet.peerId)),
             pingsToOtherUsers: report,
@@ -113,10 +122,16 @@ export const usePeersStore = create<PeersStore>((set, get) => ({
 
     sendPacket({
       type: "ping.report",
-      report: Object.keys(knownPeers).map((peerId) => {
-        const peer = knownPeers[peerId];
-        return { peerId: peerId, ping: peer.lastPing?.ping };
-      }),
+      report: Object.keys(knownPeers)
+        .map((peerId) => knownPeers[peerId])
+        .filter((peer) => !peer.gossiped && peer.lastPing !== undefined)
+        .map((peer) => {
+          return {
+            peerId: peer.peerId,
+            ping: peer.lastPing!.ping,
+            receivedTime: peer.lastPing!.receivedTime,
+          };
+        }),
     });
   },
 }));
@@ -128,3 +143,6 @@ if (window.webxdc) {
   setInterval(usePeersStore.getState().sendPing, PING_INTERVAL);
   setInterval(usePeersStore.getState().sendPingReport, PING_REPORT_INTERVAL);
 }
+
+/** when the ui considers a peer as offline */
+export const UI_OFFLINE_TIMEOUT = PING_INTERVAL * 5;

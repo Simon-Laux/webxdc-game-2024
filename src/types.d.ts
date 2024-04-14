@@ -7,6 +7,7 @@ import { PeerId } from "./systems/peerId";
 export interface PeerPingState {
   peerId: string;
   ping?: number;
+  receivedTime: number,
 }
 
 export type PeerPingReport = PeerPingState[];

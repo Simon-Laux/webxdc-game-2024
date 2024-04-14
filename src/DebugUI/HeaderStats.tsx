@@ -1,12 +1,10 @@
 import React from "react";
 import { UserGroupIcon } from "@heroicons/react/24/outline";
-import { PING_INTERVAL, usePeersStore } from "../systems/PeerStore";
-
-const OFFLINE_TIMEOUT = PING_INTERVAL * 5;
+import { UI_OFFLINE_TIMEOUT, usePeersStore } from "../systems/PeerStore";
 
 export function HeaderStats() {
   const peerCount = usePeersStore(({ knownPeers }) => {
-    const cuttoffTS = Date.now() - OFFLINE_TIMEOUT;
+    const cuttoffTS = Date.now() - UI_OFFLINE_TIMEOUT;
     return Object.keys(knownPeers)
       .map((key) => knownPeers[key])
       .filter((peer) => peer.last_seen >= cuttoffTS

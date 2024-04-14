@@ -1,10 +1,6 @@
 import { create } from "zustand";
 import { myPeerId } from "./peerId";
-import {
-  Payload,
-  PeerPingReport,
-  PingPackets,
-} from "../types";
+import { Payload, PeerPingReport, PingPackets } from "../types";
 import { randomId } from "../util";
 import { sendPacket } from "../connection";
 
@@ -21,8 +17,8 @@ interface Peer {
   last_seen: number;
 }
 
-const buildPeer = (peerId: string, last_seen: number) => {
-  return { peerId, last_seen } as Peer;
+const buildPeer = (peerId: string) => {
+  return { peerId, last_seen: 0 } as Peer;
 };
 
 interface PeersStore {
@@ -60,9 +56,9 @@ export const usePeersStore = create<PeersStore>((set, get) => ({
           knownPeers: {
             ...knownPeers,
             [packet.peerId]: {
-              ...(knownPeers[packet.peerId] ||
-                buildPeer(packet.peerId, receivedTime)),
+              ...(knownPeers[packet.peerId] || buildPeer(packet.peerId)),
               lastPing: { receivedTime, ping },
+              last_seen: receivedTime,
             },
           },
         }));
@@ -70,13 +66,30 @@ export const usePeersStore = create<PeersStore>((set, get) => ({
     } else if (packet.payload.type === "ping.report") {
       const receivedTime = Date.now();
       const report = packet.payload.report;
+      const knownPeerIds = [
+        ...Object.keys(get().knownPeers),
+        myPeerId,
+        packet.peerId,
+      ];
+      const newPeers = report
+        .map((item) => item.peerId)
+        .filter((id) => knownPeerIds.indexOf(id) === -1)
+        .map(buildPeer)
+        .reduce(
+          (container, peer) => {
+            container[peer.peerId] = peer;
+            return container;
+          },
+          {} as PeersStore["knownPeers"]
+        );
       set(({ knownPeers }) => ({
         knownPeers: {
           ...knownPeers,
+          ...newPeers,
           [packet.peerId]: {
-            ...(knownPeers[packet.peerId] ||
-              buildPeer(packet.peerId, receivedTime)),
+            ...(knownPeers[packet.peerId] || buildPeer(packet.peerId)),
             pingsToOtherUsers: report,
+            last_seen: receivedTime,
           },
         },
       }));
@@ -108,8 +121,8 @@ export const usePeersStore = create<PeersStore>((set, get) => ({
   },
 }));
 
-export const PING_INTERVAL = 800
-export const PING_REPORT_INTERVAL = 4000
+export const PING_INTERVAL = 800;
+export const PING_REPORT_INTERVAL = 4000;
 
 if (window.webxdc) {
   setInterval(usePeersStore.getState().sendPing, PING_INTERVAL);

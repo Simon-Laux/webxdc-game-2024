@@ -1,6 +1,7 @@
 table.pingtable {
   border: 1px solid lightgrey;
   border-collapse: collapse;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 table.pingtable thead {

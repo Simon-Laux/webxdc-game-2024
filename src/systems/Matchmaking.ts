@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { sendPacket, sendUpdate } from "../connection";
 import {
   MatchmakingConfirm,
+  MatchmakingMatchResult,
   MatchmakingPackets,
   MatchmakingRequest,
   Payload,
@@ -11,10 +12,10 @@ import { myPeerId, PeerId } from "./peerId";
 
 export type MatchId = string;
 
-enum MatchWinner {
-  HostWins,
-  GuestWins,
-  Tie,
+export enum MatchWinner {
+  HostWins = "HostWins",
+  GuestWins = "GuestWins",
+  Tie = "Tie",
 }
 
 export interface MatchResult {
@@ -45,9 +46,12 @@ interface Matchmaking {
   matchRequests: MatchRequest[];
   runningMatches: RunningMatch[];
   pastMatches: PastMatch[];
+  /** your current game that you are playing or spectating */
+  currentGame: MatchId | null;
   processPackage: (packet: Payload<MatchmakingPackets>) => void;
   sendMatchRequest: () => void;
   sendJoinRequest: (request: MatchRequest) => void;
+  endMatch: (matchId: MatchId, result: MatchResult) => void;
 }
 
 // /** stores all known match ids so we can easialy check for new requests if the id  */
@@ -58,6 +62,7 @@ export const useMatchmaking = create<Matchmaking>((set, get) => ({
   matchRequests: [],
   runningMatches: [],
   pastMatches: [],
+  currentGame: null,
   processPackage: (packet) => {
     if (packet.payload.type === "match.request") {
       if (
@@ -112,6 +117,7 @@ export const useMatchmaking = create<Matchmaking>((set, get) => ({
       // create match
       set(({ runningMatches }) => ({
         runningMatches: [...runningMatches, match],
+        currentGame: match.matchId,
       }));
 
       // send confirmation
@@ -123,7 +129,11 @@ export const useMatchmaking = create<Matchmaking>((set, get) => ({
       sendPacket(newPacket);
       sendUpdate(newPacket);
     } else if (packet.payload.type === "match.confirm") {
-      if (get().runningMatches.findIndex((m) => m.matchId) !== -1) {
+      if (
+        get().runningMatches.findIndex(
+          (m) => m.matchId === packet.payload.matchId
+        ) !== -1
+      ) {
         console.debug("match already exists");
         // remove request
         set(({ matchRequests }) => ({
@@ -145,8 +155,43 @@ export const useMatchmaking = create<Matchmaking>((set, get) => ({
         ),
         runningMatches: [...runningMatches, match],
       }));
+      if (match.guest === myPeerId || match.host === myPeerId) {
+        set({ currentGame: match.matchId });
+      }
     } else if (packet.payload.type === "match.result") {
+      // check if running match exists
+      const match = get().runningMatches.find(
+        (m) => m.matchId === packet.payload.matchId
+      );
+      if (!match) {
+        console.debug("match ending: match does not exist (anymore?)");
+        return;
+      }
+      if (
+        match.host !== packet.payload.host &&
+        match.guest !== packet.payload.guest
+      ) {
+        console.error("local data inconsistent with received data");
+        return;
+      }
+      // check if the person is eith host or guest
+      if (match.host !== packet.peerId && match.guest !== packet.peerId) {
+        console.debug("match ending: peer can not end match it is not part of");
+        return;
+      }
+      const pastMatch: PastMatch = {
+        matchId: packet.payload.matchId,
+        host: packet.payload.host,
+        guest: packet.payload.guest,
+        result: packet.payload.result,
+      };
       // remove running match and create past match
+      set(({ runningMatches, pastMatches }) => ({
+        runningMatches: runningMatches.filter(
+          (mr) => mr.matchId !== packet.payload.matchId
+        ),
+        pastMatches: [...pastMatches, pastMatch],
+      }));
     }
   },
   sendMatchRequest: () => {
@@ -189,14 +234,44 @@ export const useMatchmaking = create<Matchmaking>((set, get) => ({
         "you can not join a match if you have an open match request"
       );
     }
-    if (get().runningMatches.findIndex((m) => m.host === myPeerId || m.guest === myPeerId) !== -1) {
-        throw new Error(
-          "you can not join a match if are already in a match"
-        );
-      }
+    if (
+      get().runningMatches.findIndex(
+        (m) => m.host === myPeerId || m.guest === myPeerId
+      ) !== -1
+    ) {
+      throw new Error("you can not join a match if are already in a match");
+    }
     // send join request
     sendPacket({ type: "match.accept", matchId: request.matchId });
     set({ currentJoinRequest: request.matchId });
+  },
+  endMatch: (matchId, result) => {
+    // check if running match exists
+    const match = get().runningMatches.find((m) => m.matchId === matchId);
+    if (!match) {
+      throw new Error("match does not exist");
+    }
+    // check if the person is either host or guest
+    if (match.host !== myPeerId && match.guest !== myPeerId) {
+      console.debug("match ending: peer can not end match it is not part of");
+      return;
+    }
+
+    // send match end
+    const packet: MatchmakingMatchResult = {
+      type: "match.result",
+      matchId: match.matchId,
+      host: match.host,
+      guest: match.guest,
+      result,
+    };
+
+    sendPacket(packet);
+    sendUpdate(packet);
+    get().processPackage({
+      peerId: myPeerId,
+      payload: packet,
+    });
   },
 }));
 

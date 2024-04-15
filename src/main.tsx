@@ -6,6 +6,8 @@ import { EphermeralReadyPromise, StatusUpdateReadyPromise } from "./connection";
 import DebugUI from "./DebugUI";
 import { HeaderStats } from "./DebugUI/HeaderStats";
 import { MatchSelector } from "./MatchmakingUI";
+import { useMatchmaking } from "./systems/Matchmaking";
+import { GameView } from "./Game";
 
 export function App() {
   const [readyEphermeral, setReadyEphermeral] = useState(false);
@@ -16,6 +18,8 @@ export function App() {
     EphermeralReadyPromise.then(() => setReadyEphermeral(true));
     StatusUpdateReadyPromise.then(() => setReadyStatusUpdate(true));
   }, []);
+
+  const currentMatch = useMatchmaking(({currentGame})=>currentGame)
 
   return (
     <div>
@@ -38,7 +42,13 @@ export function App() {
         {readyEphermeral || "Waiting for someone else to open the webxdc"}
       </div>
 
-      {readyStatusUpdate && readyEphermeral && <MatchSelector />}
+      {readyStatusUpdate && readyEphermeral && <>
+
+       {!currentMatch && <MatchSelector />}
+       {currentMatch && <GameView matchId={currentMatch} />}
+
+      
+      </>}
 
       {showDebugUI && <DebugUI onClose={() => setShowDebugUI(false)} />}
     </div>

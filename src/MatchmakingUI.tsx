@@ -91,7 +91,19 @@ export function RunningMatches() {
 }
 
 export function PastMatches() {
-  return <div></div>;
+  const pastMatches = useMatchmaking(({ pastMatches }) => pastMatches);
+  return (
+    <div>
+      <li>
+        {pastMatches.map((match) => (
+          <ul>
+            {match.matchId}: <Name peerId={match.host} /> vs{" "}
+            <Name peerId={match.guest} />
+            <br />
+            Result: {JSON.stringify(match.result)}
+          </ul>
+        ))}
+      </li>
+    </div>
+  );
 }
-
-

@@ -129,6 +129,9 @@ export const useMatchmaking = create<Matchmaking>((set, get) => ({
       sendPacket(newPacket);
       sendUpdate(newPacket);
     } else if (packet.payload.type === "match.confirm") {
+      if (get().currentJoinRequest === packet.payload.matchId) {
+        set({ currentJoinRequest: null });
+      }
       if (
         get().runningMatches.findIndex(
           (m) => m.matchId === packet.payload.matchId

@@ -1,5 +1,8 @@
 The idea is to make somewhat modular state systems that can be copied for other projects.
 
+important TODO:
+- [ ] Option to cancel mtch invitation
+- [ ] There is some bug when ending the game that it sometimes can be ended even though it is already over?
 
 systems (ideas):
 

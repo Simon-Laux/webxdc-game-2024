@@ -40,7 +40,7 @@ export function MatchRequestElement({ request }: { request: MatchRequest }) {
     lastSentPing,
   }));
   const currentJoinRequest = useMatchmaking(
-    ({ currentJoinRequest }) => currentJoinRequest
+    ({ currentJoinRequest }) => currentJoinRequest,
   );
   const peer: Peer | undefined = knownPeers[request.host];
 

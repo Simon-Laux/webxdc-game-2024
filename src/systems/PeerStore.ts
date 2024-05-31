@@ -82,14 +82,14 @@ export const usePeersStore = create<PeersStore>((set, get) => ({
       const newGossipedPeers = report
         .filter(({ peerId }) => knownPeerIds.indexOf(peerId) === -1)
         .map(({ peerId, receivedTime }) =>
-          buildGossipedPeer(peerId, receivedTime)
+          buildGossipedPeer(peerId, receivedTime),
         )
         .reduce(
           (container, peer) => {
             container[peer.peerId] = peer;
             return container;
           },
-          {} as PeersStore["knownPeers"]
+          {} as PeersStore["knownPeers"],
         );
       set(({ knownPeers }) => ({
         knownPeers: {

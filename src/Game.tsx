@@ -11,7 +11,7 @@ import { myPeerId } from "./systems/peerId";
 
 export function GameView({ matchId }: { matchId: MatchId }) {
   const match = useMatchmaking(({ runningMatches }) =>
-    runningMatches.find((rm) => rm.matchId === matchId)
+    runningMatches.find((rm) => rm.matchId === matchId),
   );
   let goBackTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -19,7 +19,7 @@ export function GameView({ matchId }: { matchId: MatchId }) {
     if (!goBackTimeout.current) {
       goBackTimeout.current = setTimeout(
         () => useMatchmaking.setState({ currentGame: null }),
-        3000
+        3000,
       );
     }
     return <div>No running match with that id. Going back in 3 seconds.</div>;

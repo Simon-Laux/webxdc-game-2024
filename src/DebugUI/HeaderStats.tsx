@@ -7,8 +7,7 @@ export function HeaderStats() {
     const cuttoffTS = Date.now() - UI_OFFLINE_TIMEOUT;
     return Object.keys(knownPeers)
       .map((key) => knownPeers[key])
-      .filter((peer) => peer.last_seen >= cuttoffTS
-    ).length;
+      .filter((peer) => peer.last_seen >= cuttoffTS).length;
   });
 
   return (

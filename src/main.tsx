@@ -18,11 +18,11 @@ export function App() {
   useEffect(() => {
     // there is no ready promise anymore for Ephermeral channels
     useDisplayNames.getState().requestNames();
-    setReadyEphermeral(true)
+    setReadyEphermeral(true);
     StatusUpdateReadyPromise.then(() => setReadyStatusUpdate(true));
   }, []);
 
-  const currentMatch = useMatchmaking(({currentGame})=>currentGame)
+  const currentMatch = useMatchmaking(({ currentGame }) => currentGame);
 
   return (
     <div>
@@ -45,13 +45,12 @@ export function App() {
         {readyEphermeral || "Waiting for someone else to open the webxdc"}
       </div>
 
-      {readyStatusUpdate && readyEphermeral && <>
-
-       {!currentMatch && <MatchSelector />}
-       {currentMatch && <GameView matchId={currentMatch} />}
-
-      
-      </>}
+      {readyStatusUpdate && readyEphermeral && (
+        <>
+          {!currentMatch && <MatchSelector />}
+          {currentMatch && <GameView matchId={currentMatch} />}
+        </>
+      )}
 
       {showDebugUI && <DebugUI onClose={() => setShowDebugUI(false)} />}
     </div>

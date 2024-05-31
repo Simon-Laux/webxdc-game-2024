@@ -123,7 +123,7 @@ export default function PingGraph() {
         ping: peer.lastPing?.ping,
         receivedTime: peer.lastPing?.receivedTime || 0,
       };
-    }
+    },
   );
 
   const offlineCutoff = Date.now() - UI_OFFLINE_TIMEOUT;

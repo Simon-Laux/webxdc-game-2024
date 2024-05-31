@@ -19,7 +19,10 @@ export default function DebugUI({ onClose }: { onClose: () => void }) {
         flexDirection: "column",
       }}
     >
-      <button onClick={onClose} style={{ fontSize: "1.4em", margin: 5, flexShrink: 0 }}>
+      <button
+        onClick={onClose}
+        style={{ fontSize: "1.4em", margin: 5, flexShrink: 0 }}
+      >
         Close debug menu
       </button>
       <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>

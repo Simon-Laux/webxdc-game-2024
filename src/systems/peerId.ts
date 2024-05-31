@@ -1,4 +1,4 @@
-export type PeerId = string
+export type PeerId = string;
 
 export const myPeerId = (() => {
   const LOCAL_STORAGE_KEY = "my.game.deviceId";
@@ -6,7 +6,7 @@ export const myPeerId = (() => {
   if (!deviceId) {
     localStorage.setItem(
       LOCAL_STORAGE_KEY,
-      (deviceId = (Math.random() * 100).toString(26))
+      (deviceId = (Math.random() * 100).toString(26)),
     );
   }
   return `${window.webxdc?.selfAddr || "?"}-${deviceId}` as PeerId;

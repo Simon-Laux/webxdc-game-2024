@@ -1,7 +1,6 @@
 //@ts-ignore
 import getRGB from "consistent-color-generation";
 
-
 const randomIdSeed = Math.floor(Math.random() * 1000);
 
 export function randomId() {
@@ -12,6 +11,6 @@ export function randomId() {
 
 export function name2Color(name: string, myself: boolean) {
   return getRGB(name, undefined, myself ? 90 : 80, myself ? 40 : 60).toString(
-    "hex"
+    "hex",
   );
 }

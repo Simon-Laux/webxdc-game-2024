@@ -14,31 +14,31 @@ import {
   StatusPacket,
 } from "./types";
 
-const RealtimeChannel = window.webxdc.joinRealtimeChannel()
+const RealtimeChannel = window.webxdc.joinRealtimeChannel();
 
 RealtimeChannel.setListener((raw_data) => {
-      const packet = decode(raw_data) as EpermeralPayload
-      // sort packets to to right handler
-      // ts is not smart enough yet, so we need to handle the type conversion ourselves
+  const packet = decode(raw_data) as EpermeralPayload;
+  // sort packets to to right handler
+  // ts is not smart enough yet, so we need to handle the type conversion ourselves
 
-      if (packet.payload.type.startsWith("ping.")) {
-        usePeersStore.getState().processPackage(packet as Payload<PingPackets>);
-      }
+  if (packet.payload.type.startsWith("ping.")) {
+    usePeersStore.getState().processPackage(packet as Payload<PingPackets>);
+  }
 
-      if (packet.payload.type.startsWith("match.")) {
-        useMatchmaking
-          .getState()
-          .processPackage(packet as Payload<MatchmakingPackets>);
-      }
+  if (packet.payload.type.startsWith("match.")) {
+    useMatchmaking
+      .getState()
+      .processPackage(packet as Payload<MatchmakingPackets>);
+  }
 
-      if (packet.payload.type.startsWith("displayname.")) {
-        useDisplayNames
-          .getState()
-          .processPackage(packet as Payload<DisplaynamePackets>);
-      }
+  if (packet.payload.type.startsWith("displayname.")) {
+    useDisplayNames
+      .getState()
+      .processPackage(packet as Payload<DisplaynamePackets>);
+  }
 
-      console.debug("[IN]", packet.peerId, packet.payload.type, packet.payload);
-    })
+  console.debug("[IN]", packet.peerId, packet.payload.type, packet.payload);
+});
 
 export function sendPacket(packet: EpermeralPacket) {
   console.debug("[OUT]", packet.type, packet);
@@ -64,6 +64,6 @@ export function sendUpdate(packet: StatusPacket) {
   console.debug("{OUT}", packet.type, packet);
   window.webxdc.sendUpdate(
     { payload: { peerId: myPeerId, payload: packet } },
-    packet.type
+    packet.type,
   );
 }

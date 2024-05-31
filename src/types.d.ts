@@ -150,6 +150,6 @@ export type EpermeralPayload = Payload<EpermeralPacket>;
 
 declare global {
   interface Window {
-    webxdc: Webxdc<StatusPayload, EpermeralPayload>;
+    webxdc: Webxdc<StatusPayload>;
   }
 }

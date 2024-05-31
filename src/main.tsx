@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 
 import "./systems/peerId";
-import { EphermeralReadyPromise, StatusUpdateReadyPromise } from "./connection";
+import { StatusUpdateReadyPromise } from "./connection";
 import DebugUI from "./DebugUI";
 import { HeaderStats } from "./DebugUI/HeaderStats";
 import { MatchSelector } from "./MatchmakingUI";
 import { useMatchmaking } from "./systems/Matchmaking";
 import { GameView } from "./Game";
+import { useDisplayNames } from "./systems/DisplayNameStore";
 
 export function App() {
   const [readyEphermeral, setReadyEphermeral] = useState(false);
@@ -15,7 +16,9 @@ export function App() {
   const [showDebugUI, setShowDebugUI] = useState(false);
 
   useEffect(() => {
-    EphermeralReadyPromise.then(() => setReadyEphermeral(true));
+    // there is no ready promise anymore for Ephermeral channels
+    useDisplayNames.getState().requestNames();
+    setReadyEphermeral(true)
     StatusUpdateReadyPromise.then(() => setReadyStatusUpdate(true));
   }, []);
 

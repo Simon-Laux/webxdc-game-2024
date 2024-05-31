@@ -1,3 +1,5 @@
+import { encode, decode } from "@msgpack/msgpack";
+
 import { useDisplayNames } from "./systems/DisplayNameStore";
 import { useMatchmaking } from "./systems/Matchmaking";
 import { myPeerId } from "./systems/peerId";
@@ -5,15 +7,17 @@ import { usePeersStore } from "./systems/PeerStore";
 import {
   DisplaynamePackets,
   EpermeralPacket,
+  EpermeralPayload,
   MatchmakingPackets,
   Payload,
   PingPackets,
   StatusPacket,
 } from "./types";
 
-export const EphermeralReadyPromise =
-  window.webxdc
-    ?.setEphemeralUpdateListener((packet) => {
+const RealtimeChannel = window.webxdc.joinRealtimeChannel()
+
+RealtimeChannel.setListener((raw_data) => {
+      const packet = decode(raw_data) as EpermeralPayload
       // sort packets to to right handler
       // ts is not smart enough yet, so we need to handle the type conversion ourselves
 
@@ -35,13 +39,10 @@ export const EphermeralReadyPromise =
 
       console.debug("[IN]", packet.peerId, packet.payload.type, packet.payload);
     })
-    .then(() => {
-      useDisplayNames.getState().requestNames();
-    }) || Promise.reject("webxdc p2p does not exist");
 
 export function sendPacket(packet: EpermeralPacket) {
   console.debug("[OUT]", packet.type, packet);
-  window.webxdc.sendEphemeralUpdate({ peerId: myPeerId, payload: packet });
+  RealtimeChannel.send(encode({ peerId: myPeerId, payload: packet }));
 }
 
 export const StatusUpdateReadyPromise =

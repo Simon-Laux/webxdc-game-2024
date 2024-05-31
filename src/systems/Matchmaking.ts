@@ -162,6 +162,8 @@ export const useMatchmaking = create<Matchmaking>((set, get) => ({
         set({ currentGame: match.matchId });
       }
     } else if (packet.payload.type === "match.result") {
+      console.log("match.result before", get());
+      
       // check if running match exists
       const match = get().runningMatches.find(
         (m) => m.matchId === packet.payload.matchId
@@ -177,7 +179,7 @@ export const useMatchmaking = create<Matchmaking>((set, get) => ({
         console.error("local data inconsistent with received data");
         return;
       }
-      // check if the person is eith host or guest
+      // check if the person is either host or guest
       if (match.host !== packet.peerId && match.guest !== packet.peerId) {
         console.debug("match ending: peer can not end match it is not part of");
         return;
@@ -195,6 +197,7 @@ export const useMatchmaking = create<Matchmaking>((set, get) => ({
         ),
         pastMatches: [...pastMatches, pastMatch],
       }));
+      console.log("match.result after", get());
     }
   },
   sendMatchRequest: () => {
@@ -269,12 +272,12 @@ export const useMatchmaking = create<Matchmaking>((set, get) => ({
       result,
     };
 
-    sendPacket(packet);
-    sendUpdate(packet);
     get().processPackage({
       peerId: myPeerId,
       payload: packet,
     });
+    sendPacket(packet);
+    sendUpdate(packet);
   },
 }));
 

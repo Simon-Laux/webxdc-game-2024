@@ -215,6 +215,15 @@ function Game({ match }: { match: RunningMatch }) {
       orbitalControllRef.current?.setAzimuthalAngle(
         myRole === Role.Guest ? 0 : Math.PI
       );
+      if (orbitalControllRef.current) {
+        orbitalControllRef.current.minDistance = 18;
+      }
+      orbitalControllRef.current?.setPolarAngle(1.1640813379199408);
+      setTimeout(() => {
+        if (orbitalControllRef.current) {
+          orbitalControllRef.current.minDistance = 6;
+        }
+      }, 100);
     }, 100);
   }, [orbitalControllRef.current, readyToShow]);
 
@@ -240,7 +249,7 @@ function Game({ match }: { match: RunningMatch }) {
     min: number | undefined,
     max: number | undefined,
   ] = [undefined, undefined];
-  if (readyToShow){
+  if (readyToShow) {
     if (myRole === Role.Host) {
       azimuthAngleRestrictions = [Math.PI / 2, -Math.PI / 2];
     } else if (myRole === Role.Guest) {

@@ -22,7 +22,11 @@ import {
   useMatchmaking,
 } from "./systems/Matchmaking";
 import { myPeerId } from "./systems/peerId";
-import { OrbitControls } from "@react-three/drei/core/OrbitControls";
+import {
+  OrbitControls,
+  OrbitControlsProps,
+} from "@react-three/drei/core/OrbitControls";
+import { ForwardRefComponent } from "@react-three/drei/helpers/ts-utils";
 
 export function GameView({ matchId }: { matchId: MatchId }) {
   const match = useMatchmaking(({ runningMatches }) =>
@@ -100,13 +104,17 @@ type Input = {
 type Team = Role.Host | Role.Guest;
 
 interface Unit {
+  /** that react can reuse them correctly */
+  unit_key: number;
   position: Position;
   hp: number;
   team: Team;
   speed: number;
 }
+let unit_key = 0;
 function newUnit(position: Position, team: Team): Unit {
   return {
+    unit_key: unit_key++,
     position,
     team,
     hp: 100,
@@ -124,7 +132,7 @@ const calculateFrame: calculateFrameFunction<GameState, Input> = (
   inputs
 ) => {
   // make sure game state is immutable by not modifinyng it directly
-  const units: typeof prev.units = /* cloned */ JSON.parse(
+  let units: typeof prev.units = /* cloned */ JSON.parse(
     JSON.stringify(prev.units)
   );
 
@@ -148,6 +156,11 @@ const calculateFrame: calculateFrameFunction<GameState, Input> = (
     const direction = unit.team === Role.Host ? 1 : -1;
     unit.position.y += direction * unit.speed;
   }
+
+  // remove out of bounds units and units with 0 health
+  units = units.filter(
+    (unit) => unit.position.x < 50 && unit.position.x > -50 && unit.hp > 0
+  );
 
   return { units };
 };
@@ -178,15 +191,22 @@ function Game({ match }: { match: RunningMatch }) {
     game.current?.sendInput({
       type: "spawnUnit",
       position: {
-        y: myRole === Role.Host ? 0 : 50,
+        y: myRole === Role.Host ? -10 : 10,
         x: (pos === "left" ? 2 : -2) * (myRole === Role.Host ? 1 : -1),
       },
     });
   };
 
+  const orbitalControllRef = useRef<any>();
+
   useEffect(() => {
     // to find this on dc desktop you neex to switch the console context to the iframe
     (window as any).debug_game = game;
+
+    orbitalControllRef.current?.setAzimuthalAngle(
+      myRole === Role.Guest ? 0 : Math.PI
+    );
+
     console.log({ game });
     // todo also connect network receiver
     const intervall = setInterval(
@@ -195,6 +215,16 @@ function Game({ match }: { match: RunningMatch }) {
     );
     return () => clearInterval(intervall);
   });
+
+  let azimuthAngleRestrictions: [
+    min: number | undefined,
+    max: number | undefined,
+  ] = [undefined, undefined];
+  if (myRole === Role.Host) {
+    azimuthAngleRestrictions = [Math.PI / 2, -Math.PI / 2];
+  } else if (myRole === Role.Guest) {
+    azimuthAngleRestrictions = [-Math.PI / 2, Math.PI / 2];
+  }
 
   return (
     <div
@@ -211,8 +241,11 @@ function Game({ match }: { match: RunningMatch }) {
             makeDefault
             minPolarAngle={0}
             maxPolarAngle={Math.PI / 2}
+            minAzimuthAngle={azimuthAngleRestrictions[0]}
+            maxAzimuthAngle={azimuthAngleRestrictions[1]}
             maxDistance={30}
-            maxZoom={2}
+            minDistance={2}
+            ref={orbitalControllRef}
           />
           <ambientLight intensity={Math.PI / 2} />
           <spotLight
@@ -227,6 +260,8 @@ function Game({ match }: { match: RunningMatch }) {
             decay={0}
             intensity={Math.PI}
           />
+          <directionalLight intensity={Math.PI} />
+          <ArenaFloor />
         </Canvas>
         <div>
           <button onClick={() => spawn("left")}>Spawn left</button>
@@ -258,10 +293,23 @@ function GameRoot() {
   return (
     <>
       {state?.game.units.map((unit) => {
-        return <RenderedUnit unit={unit} />;
+        return <RenderedUnit unit={unit} key={unit.unit_key} />;
       })}
       <Box position={[0, 0, 0]} />
     </>
+  );
+}
+
+function degreesToRadians(degrees: number) {
+  return degrees * (Math.PI / 180);
+}
+
+function ArenaFloor() {
+  return (
+    <mesh position={[0, -1, 0]} rotation={[degreesToRadians(-90), 0, 0]}>
+      <planeGeometry args={[14, 26]} />
+      <meshStandardMaterial color={"green"} />
+    </mesh>
   );
 }
 
@@ -293,7 +341,7 @@ function RenderedUnit({ unit }: { unit: Unit }) {
     <mesh
       ref={meshRef}
       scale={active ? 1.5 : 1}
-      position={[unit.position.x, unit.position.y, 0]}
+      position={[unit.position.x, 0, unit.position.y]}
       onClick={(event) => setActive(!active)}
     >
       <boxGeometry args={[1, 1, 1]} />

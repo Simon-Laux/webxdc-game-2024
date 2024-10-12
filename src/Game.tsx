@@ -22,9 +22,7 @@ import {
   useMatchmaking,
 } from "./systems/Matchmaking";
 import { myPeerId } from "./systems/peerId";
-import {
-  OrbitControls,
-} from "@react-three/drei/core/OrbitControls";
+import { OrbitControls } from "@react-three/drei/core/OrbitControls";
 import { GameProcessPacketHandler } from "./connection";
 
 export function GameView({ matchId }: { matchId: MatchId }) {
@@ -42,8 +40,17 @@ export function GameView({ matchId }: { matchId: MatchId }) {
     }
     return <div>No running match with that id. Going back in 3 seconds.</div>;
   }
+
+  const isSpectating = ![match.guest, match.host].includes(myPeerId);
+  const stopSpectating = () => {
+    useMatchmaking.setState({ currentGame: null });
+  };
+
   return (
     <div className="GameView">
+      {isSpectating && (
+        <button onClick={stopSpectating}>stop spectating</button>
+      )}
       <h1>
         <Name peerId={match.host} /> vs <Name peerId={match.guest} />
       </h1>
@@ -51,44 +58,46 @@ export function GameView({ matchId }: { matchId: MatchId }) {
 
       {match && <Game match={match} />}
 
-      <div>
-        <button
-          onClick={() =>
-            useMatchmaking.getState().endMatch(match.matchId, {
-              result:
-                match.host === myPeerId
-                  ? MatchWinner.GuestWins
-                  : MatchWinner.HostWins,
-              score: "score?",
-            })
-          }
-        >
-          Give Up
-        </button>
-        <button
-          onClick={() =>
-            useMatchmaking.getState().endMatch(match.matchId, {
-              result:
-                match.host === myPeerId
-                  ? MatchWinner.HostWins
-                  : MatchWinner.GuestWins,
-              score: "score?",
-            })
-          }
-        >
-          Cheat to Win Game
-        </button>
-        <button
-          onClick={() =>
-            useMatchmaking.getState().endMatch(match.matchId, {
-              result: MatchWinner.Tie,
-              score: "score?",
-            })
-          }
-        >
-          Cheat to Tie
-        </button>
-      </div>
+      {!isSpectating && (
+        <div>
+          <button
+            onClick={() =>
+              useMatchmaking.getState().endMatch(match.matchId, {
+                result:
+                  match.host === myPeerId
+                    ? MatchWinner.GuestWins
+                    : MatchWinner.HostWins,
+                score: "score?",
+              })
+            }
+          >
+            Give Up
+          </button>
+          <button
+            onClick={() =>
+              useMatchmaking.getState().endMatch(match.matchId, {
+                result:
+                  match.host === myPeerId
+                    ? MatchWinner.HostWins
+                    : MatchWinner.GuestWins,
+                score: "score?",
+              })
+            }
+          >
+            Cheat to Win Game
+          </button>
+          <button
+            onClick={() =>
+              useMatchmaking.getState().endMatch(match.matchId, {
+                result: MatchWinner.Tie,
+                score: "score?",
+              })
+            }
+          >
+            Cheat to Tie
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -202,11 +211,11 @@ function Game({ match }: { match: RunningMatch }) {
   const orbitalControllRef = useRef<any>();
   useEffect(() => {
     (window as any).orbitalControllRef = orbitalControllRef;
-    setTimeout(()=>{
+    setTimeout(() => {
       orbitalControllRef.current?.setAzimuthalAngle(
         myRole === Role.Guest ? 0 : Math.PI
       );
-    }, 100)
+    }, 100);
   }, [orbitalControllRef.current, readyToShow]);
 
   useEffect(() => {
@@ -219,9 +228,11 @@ function Game({ match }: { match: RunningMatch }) {
       game.current.nextFrame.bind(game.current),
       NETWORK_FRAME_TIME
     );
-    GameProcessPacketHandler.handler = game.current.receiveMessage.bind(game.current)
+    GameProcessPacketHandler.handler = game.current.receiveMessage.bind(
+      game.current
+    );
     return () => {
-      clearInterval(intervall)
+      clearInterval(intervall);
     };
   });
 
@@ -284,10 +295,12 @@ function Game({ match }: { match: RunningMatch }) {
             <ArenaFloor />
           </Canvas>
         </div>
-        <div>
-          <button onClick={() => spawn("left")}>Spawn left</button>
-          <button onClick={() => spawn("right")}>spawn right</button>
-        </div>
+        {myRole !== Role.Spectator && (
+          <div>
+            <button onClick={() => spawn("left")}>Spawn left</button>
+            <button onClick={() => spawn("right")}>spawn right</button>
+          </div>
+        )}
       </GameContext.Provider>
     </div>
   );

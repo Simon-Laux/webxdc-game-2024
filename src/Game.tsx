@@ -240,10 +240,12 @@ function Game({ match }: { match: RunningMatch }) {
     min: number | undefined,
     max: number | undefined,
   ] = [undefined, undefined];
-  if (myRole === Role.Host) {
-    azimuthAngleRestrictions = [Math.PI / 2, -Math.PI / 2];
-  } else if (myRole === Role.Guest) {
-    azimuthAngleRestrictions = [-Math.PI / 2, Math.PI / 2];
+  if (readyToShow){
+    if (myRole === Role.Host) {
+      azimuthAngleRestrictions = [Math.PI / 2, -Math.PI / 2];
+    } else if (myRole === Role.Guest) {
+      azimuthAngleRestrictions = [-Math.PI / 2, Math.PI / 2];
+    }
   }
 
   return (
@@ -276,6 +278,8 @@ function Game({ match }: { match: RunningMatch }) {
               ref={orbitalControllRef}
               enablePan={readyToShow}
               enableRotate={readyToShow}
+              autoRotate={!readyToShow}
+              autoRotateSpeed={4}
             />
 
             <ambientLight intensity={Math.PI / 2} />

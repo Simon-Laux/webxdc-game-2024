@@ -25,7 +25,7 @@ export function App() {
   const currentMatch = useMatchmaking(({ currentGame }) => currentGame);
 
   return (
-    <div>
+    <>
       <div style={{ display: "flex" }}>
         <h2 style={{ flexGrow: 1 }}>simon/webxdc-game2024</h2>
         <div style={{ margin: 5 }}>
@@ -53,7 +53,7 @@ export function App() {
       )}
 
       {showDebugUI && <DebugUI onClose={() => setShowDebugUI(false)} />}
-    </div>
+    </>
   );
 }
 

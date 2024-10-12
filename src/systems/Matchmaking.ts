@@ -32,6 +32,7 @@ export interface RunningMatch {
   matchId: MatchId;
   host: PeerId;
   guest: PeerId;
+  randomSeed: number;
 }
 
 export interface PastMatch {
@@ -113,6 +114,7 @@ export const useMatchmaking = create<Matchmaking>((set, get) => ({
         matchId: packet.payload.matchId,
         host: matchRequest.host,
         guest: packet.peerId,
+        randomSeed: Math.floor(Math.random()*100000)
       };
       // create match
       set(({ runningMatches }) => ({
@@ -146,10 +148,11 @@ export const useMatchmaking = create<Matchmaking>((set, get) => ({
         }));
         return;
       }
-      const match = {
+      const match:RunningMatch = {
         matchId: packet.payload.matchId,
         host: packet.payload.host,
         guest: packet.payload.guest,
+        randomSeed: packet.payload.randomSeed
       };
       // remove match request and create running match
       set(({ matchRequests, runningMatches }) => ({

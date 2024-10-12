@@ -14,3 +14,23 @@ table.pingtable tr {
 table.pingtable td {
   border: 1px solid lightgrey;
 }
+
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+}
+
+.GameView {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}

@@ -1,5 +1,6 @@
 import { sendPacket } from "../connection";
-import { GamePackets } from "../types";
+import { useMatchmaking } from "../systems/Matchmaking";
+import { GamePackets, Payload } from "../types";
 
 /** how many frames per second go over the network */
 const NETWORK_FRAME_RATE = 30;
@@ -82,26 +83,46 @@ export class ActiveGame<GameState, InputData> {
     }
   }
 
-  receiveMessage(packet: GamePackets, senderRole: Role.Host | Role.Guest) {
-    if (packet.matchId !== this.matchId) {
+  receiveMessage({ payload, peerId }: Payload<GamePackets>) {
+    if (payload.matchId !== this.matchId) {
       console.log("ignoring package for other match");
       return;
     }
 
-    if (packet.type === "game.input") {
-      this.addInput(packet.input, senderRole);
-    } else if (packet.type === "game.snapshot") {
-      const frame = packet.snapshot.state.networkFrame;
+    if (payload.type === "game.input") {
+      const match = useMatchmaking
+        .getState()
+        .runningMatches.find((match) => match.matchId === payload.matchId);
+      if (!match) {
+        throw new Error("match does not exist");
+      }
+
+      let senderRole: Role.Host | Role.Guest;
+      if (match.guest === peerId) {
+        senderRole = Role.Guest;
+      } else if (match.host === peerId) {
+        senderRole = Role.Host;
+      } else {
+        console.error(
+          "sender is neither host nor guest, this should not happen",
+          { match, peerId }
+        );
+        return;
+      }
+
+      this.addInput(payload.input, senderRole);
+    } else if (payload.type === "game.snapshot") {
+      const frame = payload.snapshot.state.networkFrame;
       if (this.gameStates[frame]) {
         // frame already exists - TODO think about what we need to do
         // maybe sth with input hash?
       } else {
-        this.gameStates[frame] = packet.snapshot.state.state;
+        this.gameStates[frame] = payload.snapshot.state.state;
       }
       // when joining as spectator or rejoining later
       if (!this.readyToShow) {
         this.currentNetworkFrame = this.initialjoinFrame =
-          packet.snapshot.state.networkFrame;
+          payload.snapshot.state.networkFrame;
         this.readyToShow = true;
       }
     }

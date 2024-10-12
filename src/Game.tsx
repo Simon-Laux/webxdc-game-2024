@@ -24,9 +24,8 @@ import {
 import { myPeerId } from "./systems/peerId";
 import {
   OrbitControls,
-  OrbitControlsProps,
 } from "@react-three/drei/core/OrbitControls";
-import { ForwardRefComponent } from "@react-three/drei/helpers/ts-utils";
+import { GameProcessPacketHandler } from "./connection";
 
 export function GameView({ matchId }: { matchId: MatchId }) {
   const match = useMatchmaking(({ runningMatches }) =>
@@ -220,7 +219,10 @@ function Game({ match }: { match: RunningMatch }) {
       game.current.nextFrame.bind(game.current),
       NETWORK_FRAME_TIME
     );
-    return () => clearInterval(intervall);
+    GameProcessPacketHandler.handler = game.current.receiveMessage.bind(game.current)
+    return () => {
+      clearInterval(intervall)
+    };
   });
 
   let azimuthAngleRestrictions: [

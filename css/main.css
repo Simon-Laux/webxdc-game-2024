@@ -34,3 +34,26 @@ body,
   flex-direction: column;
   flex-grow: 1;
 }
+
+.gameWindow {
+  flex-grow: 1;
+  max-height: 100vh;
+}
+
+.gameOverlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.gameOverlay .gameWaiting {
+ position: absolute;
+ width: 100%;
+ height: 100%;
+ background: rgba(0, 0, 0, 0.6);
+ text-align: center;
+ color: white;
+ font-weight: bold;
+ font-size: larger;
+ z-index: 1;
+}

@@ -4,9 +4,9 @@ import { GamePackets } from "../types";
 /** how many frames per second go over the network */
 const NETWORK_FRAME_RATE = 30;
 /** frame time in ms */
-export const NETWORK_FRAME_TIME = 1000 / NETWORK_FRAME_RATE;
-
+export const NETWORK_FRAME_TIME = Math.floor(1000 / NETWORK_FRAME_RATE);
 const INPUT_DELAY_FRAMES = 4;
+const FRAMES_UNTIL_SNAPSHOT = NETWORK_FRAME_RATE * 2;
 
 /* hash(hash + input)
         if 2 inputs happened in same frame then sort them deteministicly */
@@ -55,7 +55,15 @@ export class ActiveGame<GameState, InputData> {
   rollBackToFrame?: number;
 
   // whether we have enough data to show the game yet, show loading as long as this is false
-  readyToShow: boolean = false;
+  private __readyToShow: boolean = false;
+  onReadyToShow?: () => void;
+  get readyToShow() {
+    return this.__readyToShow;
+  }
+  set readyToShow(new_value) {
+    this.__readyToShow = new_value;
+    new_value && this.onReadyToShow?.();
+  }
 
   constructor(
     public matchId: string,
@@ -67,6 +75,10 @@ export class ActiveGame<GameState, InputData> {
     if (myRole === Role.Host) {
       this.gameStates[0] = initialGameState;
       this.readyToShow = true;
+      this.sendSnapshot({
+        state: initialGameState,
+        networkFrame: 0,
+      });
     }
   }
 
@@ -130,10 +142,29 @@ export class ActiveGame<GameState, InputData> {
     if (!lastFrame) {
       throw new Error("last frame is undefined, this should not happen");
     }
-    this.gameStates[this.currentNetworkFrame] = this.calculateFrame(
+    const newGameState = this.calculateFrame(
       lastFrame,
       this.inputs[this.currentNetworkFrame]
     );
+    this.gameStates[this.currentNetworkFrame] = newGameState;
+
+    if (this.currentNetworkFrame % FRAMES_UNTIL_SNAPSHOT === 0) {
+      console.log("sending snapshot", this.currentNetworkFrame);
+      this.sendSnapshot({
+        state: newGameState,
+        networkFrame: this.currentNetworkFrame,
+      });
+    }
+  }
+
+  sendSnapshot(snapshotState: GameSnapshot<GameState>["state"]) {
+    sendPacket({
+      type: "game.snapshot",
+      matchId: this.matchId,
+      snapshot: {
+        state: snapshotState,
+      },
+    });
   }
 
   addInput(inputPackage: Input<InputData>, sender: Role.Host | Role.Guest) {

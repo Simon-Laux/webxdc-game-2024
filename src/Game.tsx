@@ -187,6 +187,9 @@ function Game({ match }: { match: RunningMatch }) {
     )
   );
 
+  const [readyToShow, setReadyToShow] = useState(game.current.readyToShow);
+  game.current.onReadyToShow = () => setReadyToShow(true);
+
   const spawn = (pos: "left" | "right") => {
     game.current?.sendInput({
       type: "spawnUnit",
@@ -198,14 +201,18 @@ function Game({ match }: { match: RunningMatch }) {
   };
 
   const orbitalControllRef = useRef<any>();
+  useEffect(() => {
+    (window as any).orbitalControllRef = orbitalControllRef;
+    setTimeout(()=>{
+      orbitalControllRef.current?.setAzimuthalAngle(
+        myRole === Role.Guest ? 0 : Math.PI
+      );
+    }, 100)
+  }, [orbitalControllRef.current, readyToShow]);
 
   useEffect(() => {
     // to find this on dc desktop you neex to switch the console context to the iframe
     (window as any).debug_game = game;
-
-    orbitalControllRef.current?.setAzimuthalAngle(
-      myRole === Role.Guest ? 0 : Math.PI
-    );
 
     console.log({ game });
     // todo also connect network receiver
@@ -235,34 +242,46 @@ function Game({ match }: { match: RunningMatch }) {
       }}
     >
       <GameContext.Provider value={game.current}>
-        <Canvas style={{ flexGrow: 1 }}>
-          <GameRoot />
-          <OrbitControls
-            makeDefault
-            minPolarAngle={0}
-            maxPolarAngle={Math.PI / 2}
-            minAzimuthAngle={azimuthAngleRestrictions[0]}
-            maxAzimuthAngle={azimuthAngleRestrictions[1]}
-            maxDistance={30}
-            minDistance={2}
-            ref={orbitalControllRef}
-          />
-          <ambientLight intensity={Math.PI / 2} />
-          <spotLight
-            position={[10, 10, 10]}
-            angle={0.15}
-            penumbra={1}
-            decay={0}
-            intensity={Math.PI}
-          />
-          <pointLight
-            position={[-10, -10, -10]}
-            decay={0}
-            intensity={Math.PI}
-          />
-          <directionalLight intensity={Math.PI} />
-          <ArenaFloor />
-        </Canvas>
+        <div className="gameWindow">
+          {!readyToShow && (
+            <div className="gameOverlay">
+              {!readyToShow && (
+                <div className="gameWaiting">Waiting for info from peers</div>
+              )}
+            </div>
+          )}
+          <Canvas>
+            <GameRoot />
+            <OrbitControls
+              makeDefault
+              minPolarAngle={0}
+              maxPolarAngle={Math.PI / 2}
+              minAzimuthAngle={azimuthAngleRestrictions[0]}
+              maxAzimuthAngle={azimuthAngleRestrictions[1]}
+              maxDistance={30}
+              minDistance={2}
+              ref={orbitalControllRef}
+              enablePan={readyToShow}
+              enableRotate={readyToShow}
+            />
+
+            <ambientLight intensity={Math.PI / 2} />
+            <spotLight
+              position={[10, 10, 10]}
+              angle={0.15}
+              penumbra={1}
+              decay={0}
+              intensity={Math.PI}
+            />
+            <pointLight
+              position={[-10, -10, -10]}
+              decay={0}
+              intensity={Math.PI}
+            />
+            <directionalLight intensity={Math.PI} />
+            <ArenaFloor />
+          </Canvas>
+        </div>
         <div>
           <button onClick={() => spawn("left")}>Spawn left</button>
           <button onClick={() => spawn("right")}>spawn right</button>

@@ -80,6 +80,7 @@ export class ActiveGame<GameState, InputData> {
         state: initialGameState,
         networkFrame: 0,
       });
+      // remember that the match was started already
       localStorage.setItem(`match${matchId}`, "1")
     }
   }

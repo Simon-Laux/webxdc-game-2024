@@ -73,13 +73,14 @@ export class ActiveGame<GameState, InputData> {
     public myRole: Role,
     initialGameState: GameState
   ) {
-    if (myRole === Role.Host) {
+    if (myRole === Role.Host && !localStorage.getItem(`match${matchId}`)) {
       this.gameStates[0] = initialGameState;
       this.readyToShow = true;
       this.sendSnapshot({
         state: initialGameState,
         networkFrame: 0,
       });
+      localStorage.setItem(`match${matchId}`, "1")
     }
   }
 

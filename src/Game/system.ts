@@ -169,7 +169,10 @@ export class ActiveGame<GameState, InputData> {
     );
     this.gameStates[this.currentNetworkFrame] = newGameState;
 
-    if (this.currentNetworkFrame % FRAMES_UNTIL_SNAPSHOT === 0) {
+    if (
+      this.myRole !== Role.Spectator &&
+      this.currentNetworkFrame % FRAMES_UNTIL_SNAPSHOT === 0
+    ) {
       console.log("sending snapshot", this.currentNetworkFrame);
       this.sendSnapshot({
         state: newGameState,

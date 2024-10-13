@@ -1,4 +1,5 @@
 import { Webxdc } from "webxdc-types";
+import { GameSnapshot, Input } from "./Game/system";
 import { MatchId, MatchResult } from "./systems/Matchmaking";
 import { PeerId } from "./systems/peerId";
 
@@ -101,6 +102,7 @@ export interface MatchmakingConfirm {
   matchId: MatchId;
   host: PeerId;
   guest: PeerId;
+  randomSeed: number;
 }
 
 /**
@@ -119,6 +121,26 @@ export type MatchmakingPackets = AllPackets & MatchmakingSystemPacket;
 
 //#endregion
 
+//#region matchmaking
+export interface GamePacket extends Packet {
+  type: `game.${string}`;
+  matchId: MatchId;
+}
+
+export interface GameSnapshotPacket extends GamePacket {
+  type: `game.snapshot`;
+  snapshot: GameSnapshot<any>;
+}
+
+export interface GameInputPacket extends GamePacket {
+  type: `game.input`;
+  input: Input<any>;
+}
+
+export type GamePackets = AllPackets & GamePacket;
+
+//#endregion
+
 type EpermeralPacket =
   // Ping
   | PingPacket
@@ -131,7 +153,10 @@ type EpermeralPacket =
   | MatchmakingRequest
   | MatchmakingAccept
   | MatchmakingConfirm
-  | MatchmakingMatchResult;
+  | MatchmakingMatchResult
+  // Game
+  | GameSnapshotPacket
+  | GameInputPacket;
 type StatusPacket =
   // Matchmaking
   MatchmakingRequest | MatchmakingConfirm | MatchmakingMatchResult;

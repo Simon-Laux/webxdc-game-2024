@@ -40,7 +40,7 @@ export function MatchRequestElement({ request }: { request: MatchRequest }) {
     lastSentPing,
   }));
   const currentJoinRequest = useMatchmaking(
-    ({ currentJoinRequest }) => currentJoinRequest,
+    ({ currentJoinRequest }) => currentJoinRequest
   );
   const peer: Peer | undefined = knownPeers[request.host];
 
@@ -75,12 +75,13 @@ export function MatchRequestElement({ request }: { request: MatchRequest }) {
 }
 
 export function RunningMatches() {
-  const runningMatches = useMatchmaking(({ runningMatches }) => runningMatches);
-  // disabled button because you might be able to spectate at a later point in time
+  const { runningMatches, spectate } = useMatchmaking(
+    ({ runningMatches, spectate }) => ({ runningMatches, spectate })
+  );
   return (
     <div>
       {runningMatches.map((match) => (
-        <button disabled>
+        <button onClick={() => spectate(match.matchId)}>
           <Name peerId={match.host} /> vs <Name peerId={match.guest} />
           <br />
           <small>{match.matchId}</small>

@@ -8,6 +8,7 @@ import {
   DisplaynamePackets,
   EpermeralPacket,
   EpermeralPayload,
+  GamePackets,
   MatchmakingPackets,
   Payload,
   PingPackets,
@@ -16,6 +17,11 @@ import {
 
 const RealtimeChannel = window.webxdc.joinRealtimeChannel();
 
+export const GameProcessPacketHandler: {
+  handler:| ((packet: Payload<GamePackets>) => void)
+  | null
+} = {handler:null};
+
 RealtimeChannel.setListener((raw_data) => {
   const packet = decode(raw_data) as EpermeralPayload;
   // sort packets to to right handler
@@ -23,18 +29,19 @@ RealtimeChannel.setListener((raw_data) => {
 
   if (packet.payload.type.startsWith("ping.")) {
     usePeersStore.getState().processPackage(packet as Payload<PingPackets>);
-  }
-
-  if (packet.payload.type.startsWith("match.")) {
+  } else if (packet.payload.type.startsWith("match.")) {
     useMatchmaking
       .getState()
       .processPackage(packet as Payload<MatchmakingPackets>);
-  }
-
-  if (packet.payload.type.startsWith("displayname.")) {
+  } else if (packet.payload.type.startsWith("displayname.")) {
     useDisplayNames
       .getState()
       .processPackage(packet as Payload<DisplaynamePackets>);
+  } else if (
+    packet.payload.type.startsWith("game.") &&
+    GameProcessPacketHandler.handler
+  ) {
+    GameProcessPacketHandler.handler(packet as Payload<GamePackets>);
   }
 
   console.debug("[IN]", packet.peerId, packet.payload.type, packet.payload);
@@ -64,6 +71,6 @@ export function sendUpdate(packet: StatusPacket) {
   console.debug("{OUT}", packet.type, packet);
   window.webxdc.sendUpdate(
     { payload: { peerId: myPeerId, payload: packet } },
-    packet.type,
+    packet.type
   );
 }
